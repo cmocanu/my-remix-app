@@ -9,6 +9,7 @@ import {
   redirect,
   useActionData,
   useLoaderData,
+  useSearchParams,
 } from "remix";
 
 import { prisma } from "~/db.server";
@@ -19,7 +20,6 @@ enum FormNames {
 }
 
 export const sendSalaryAction = async (formData: FormData) => {
-  // const formData = await request.formData();
   console.log("mybug formData", Object.fromEntries(formData));
   const companie = formData.get("companie");
   const pozitie = formData.get("pozitie");
@@ -28,26 +28,6 @@ export const sendSalaryAction = async (formData: FormData) => {
   const ani_experienta = formData.get("ani_experienta");
   const scutit_de_impozit = formData.get("scutit_de_impozit");
   const pfa = formData.get("pfa");
-
-  // const data = Object.fromEntries(await request.formData());
-
-  //   const formErrors = {
-  //     name: validateName(data.companie),
-  //     email: validateName(data.pozitie),
-  //     password: validateName(data.oras),
-  //     confirmPassword: validateName(data.password),
-  //   };
-
-  //   if (
-  //     typeof companie !== "string" ||
-  //     typeof pozitie !== "string" ||
-  //     typeof oras !== "string" ||
-  //     typeof scutit_de_impozit !== "string" ||
-  //     typeof pfa !== "string" ||
-  //     typeof salariu !== "string"
-  //   ) {
-  //     return json({ errors: "Invalid" }, { status: 400 });
-  //   }
 
   try {
     await prisma.salariu.create({
@@ -71,31 +51,27 @@ export const sendSalaryAction = async (formData: FormData) => {
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
-
   const formName = formData.get("formName");
+  console.log("FORMNAME", formName, formData);
   if (formName === FormNames.SEND_SALARY) {
     return sendSalaryAction(formData);
+  } else if (formName === FormNames.FILTER) {
+    console.log("INTRU PE REDIRECT", formData);
+    const companie = formData.get("filtru_companie");
+    const pozitie = formData.get("filtru_pozitie");
+    const oras = formData.get("filtru_oras");
+    return redirect(
+      `/blocnotes?index&companie=${companie}&pozitie=${pozitie}&oras=${oras}`
+    );
   }
   return sendSalaryAction(formData);
-  // sendSalaryAction
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const company = url.searchParams.get("companie");
   const city = url.searchParams.get("oras");
-  // const term = url.searchParams.get("companie");
 
-  // where: {
-  //   AND: [
-  //     { price: 21.99 },
-  //     { filters: { some: { name: 'ram', value: '8GB' } } },
-  //     { filters: { some: { name: 'storage', value: '256GB' } } },
-  //   ],
-  // },
-
-  console.log("mybug companie", company);
-  // if (!company) return prisma.salariu.findMany({ take: 5 });
   return prisma.salariu.findMany({
     where: {
       AND: [
@@ -104,20 +80,52 @@ export const loader: LoaderFunction = async ({ request }) => {
       ],
     },
   });
-  // return prisma.salariu.findMany({
-  //   take: 5,
-  //   where: { companie: { contains: company } },
-  // });
-  // return salaries;
 };
 
 export default function BlocNotesIndexPage() {
   const salaries = useLoaderData() as Salariu[];
   const result = useActionData();
+  const [searchParams] = useSearchParams();
+  const filtruCompanie = searchParams.get("companie");
+  const filtruPozitie = searchParams.get("pozitie");
+  const filtruOras = searchParams.get("oras");
+  const hasSearch = !!filtruCompanie || !!filtruPozitie || !!filtruOras;
 
   return (
     <div>
       <h1>CashIT</h1>
+
+      <h6>Cauta</h6>
+      <Form method="post">
+        <div
+          style={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+        >
+          <label htmlFor="filtru_companie">
+            Companie:{" "}
+            <input id="filtru_companie" name="filtru_companie" type="text" />
+          </label>
+
+          <label htmlFor="filtru_pozitie">
+            Pozitie:{" "}
+            <input id="filtru_pozitie" name="filtru_pozitie" type="text" />
+          </label>
+
+          <label htmlFor="filtru_oras">
+            Oras: <input id="filtru_oras" name="filtru_oras" type="text" />
+          </label>
+        </div>
+        <button name="formName" value={FormNames.FILTER}>
+          Cauta
+        </button>
+      </Form>
+
+      {hasSearch && (
+        <div>
+          Ai cautat {filtruCompanie ? <>compania <b>{filtruCompanie}</b></> : null}{" "}
+          {filtruPozitie ? <> pe pozitia <b>{filtruPozitie}</b></> : null}{" "}
+          {filtruOras ? <> in orasul <b>{filtruOras}</b></> : null}
+        </div>
+      )}
 
       <table>
         <tr>
@@ -146,35 +154,35 @@ export default function BlocNotesIndexPage() {
         </tbody>
       </table>
 
+      <h4>Adauga salariu</h4>
       <Form method="post">
         <div style={{ display: "flex", flexDirection: "column" }}>
           <label htmlFor="companie">
-            Companie: <input id="companie" name="companie" type="text" />
+            Companie:{" "}
+            <input id="companie" name="companie" type="text" required />
           </label>
 
           <label htmlFor="pozitie">
-            Pozitie: <input id="pozitie" name="pozitie" type="text" />
+            Pozitie: <input id="pozitie" name="pozitie" type="text" required />
           </label>
 
           <label htmlFor="salariu">
-            Salariu: <input id="salariu" name="salariu" type="number" />
+            Salariu:{" "}
+            <input id="salariu" name="salariu" type="number" required />
           </label>
 
           <label htmlFor="oras">
-            Oras:{" "}
-            <input
-              id="oras"
-              name="oras"
-              type="text"
-              // aria-invalid={true}
-              // aria-describedby="ce plm de oras e asta??!"
-              required
-            />
+            Oras: <input id="oras" name="oras" type="text" required />
           </label>
 
           <label htmlFor="ani_experienta">
             Ani de experienta:{" "}
-            <input id="ani_experienta" name="ani_experienta" type="number" />
+            <input
+              id="ani_experienta"
+              name="ani_experienta"
+              type="number"
+              required
+            />
           </label>
 
           <label htmlFor="scutit_de_impozit">
@@ -201,7 +209,9 @@ export default function BlocNotesIndexPage() {
           </div>
         ) : null}
 
-        <button>Trimete</button>
+        <button name="formName" value={FormNames.SEND_SALARY}>
+          Trimete
+        </button>
       </Form>
       <p>
         Nu ai selectat niciun blocnotes{" "}
