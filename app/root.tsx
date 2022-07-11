@@ -17,6 +17,7 @@ export const links: LinksFunction = () => {
     { rel: "stylesheet", href: tailwindStylesheetUrl },
     // { rel: "stylesheet", href: 'https://cdn.jsdelivr.net/gh/kimeiga/bahunya@css/bahunya-0.1.3.css' },
     { rel: "stylesheet", href: 'https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css' },
+    // { rel: "stylesheet", href: 'https://unpkg.com/mvp.css' },
     // {
     //   rel: "stylesheet",
     //   href: "https://edwardtufte.github.io/tufte-css/tufte.css",
