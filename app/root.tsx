@@ -1,5 +1,6 @@
 import {
   json,
+  Link,
   Links,
   LiveReload,
   Meta,
@@ -16,7 +17,10 @@ export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: tailwindStylesheetUrl },
     // { rel: "stylesheet", href: 'https://cdn.jsdelivr.net/gh/kimeiga/bahunya@css/bahunya-0.1.3.css' },
-    { rel: "stylesheet", href: 'https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css' },
+    {
+      rel: "stylesheet",
+      href: "https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css",
+    },
     // { rel: "stylesheet", href: 'https://unpkg.com/mvp.css' },
     // {
     //   rel: "stylesheet",
@@ -49,6 +53,7 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
+        <Link to="/"><h1>CashIT</h1></Link>
         <Outlet />
         <ScrollRestoration />
         <Scripts />
