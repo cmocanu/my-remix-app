@@ -10,12 +10,12 @@ import {
 } from "remix";
 import type { LinksFunction, MetaFunction, LoaderFunction } from "remix";
 
-import tailwindStylesheetUrl from "./styles/tailwind.css";
+// import tailwindStylesheetUrl from "./styles/tailwind.css";
 import { getUser } from "./session.server";
 
 export const links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: tailwindStylesheetUrl },
+    // { rel: "stylesheet", href: tailwindStylesheetUrl },
     // { rel: "stylesheet", href: 'https://cdn.jsdelivr.net/gh/kimeiga/bahunya@css/bahunya-0.1.3.css' },
     {
       rel: "stylesheet",
