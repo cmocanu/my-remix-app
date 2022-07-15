@@ -1,6 +1,13 @@
 import { Salariu } from "@prisma/client";
-import { ActionFunction, Form, LoaderFunction, useLoaderData } from "remix";
+import {
+  ActionFunction,
+  Form,
+  Link,
+  LoaderFunction,
+  useLoaderData,
+} from "remix";
 import { prisma } from "~/db.server";
+import { getSession, getUserId, requireUserId } from "~/session.server";
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
@@ -22,18 +29,45 @@ export const action: ActionFunction = async ({ request }) => {
   return "";
 };
 
+interface LoaderData {
+  salaries: Salariu[];
+  error?: string;
+}
+
 export const loader: LoaderFunction = async ({ request }) => {
-  return await prisma.salariu.findMany({
+  //   const x = await getUserId(request);
+  //   console.log('session is', x)
+  const userId = await requireUserId(request);
+  console.log("mybug userid is", userId);
+  //   const session = await getSession(request);
+  //   console.log("session is", session.data);
+  //   const user = session.get("userId");
+  //   console.log('mybug user is', user)
+  if (!userId)
+    return {
+      error: "Trebuie sa te loghezi sefule",
+      salaries: [],
+    };
+  const salaries = await prisma.salariu.findMany({
     where: {
       AND: [{ aprobat: { equals: false } }],
     },
   });
+  return { salaries };
 };
 
 export default function Admin() {
-  const salaries = useLoaderData() as Salariu[];
+  const { salaries, error } = useLoaderData() as LoaderData;
+  if (error) {
+    return <div>Bossule nu esti logat ce cauti aici?</div>;
+  }
   return (
     <>
+      <form action="/logout" method="post">
+        <button type="submit" className="button">
+          Logout
+        </button>
+      </form>
       <h3>De aprobat</h3>
       <Form method="post">
         <table>
@@ -60,12 +94,20 @@ export default function Admin() {
                   <td>{salary.absolvent ? "✓" : "X"}</td>
                   <td>{salary.pfa ? "✓" : "X"}</td>
                   <td>
-                    <button name="approve" value={salary.id} style={{ backgroundColor: 'green'}}>
+                    <button
+                      name="approve"
+                      value={salary.id}
+                      style={{ backgroundColor: "green" }}
+                    >
                       Aproba
                     </button>
                   </td>
                   <td>
-                    <button name="remove" value={salary.id} style={{ backgroundColor: 'red'}}>
+                    <button
+                      name="remove"
+                      value={salary.id}
+                      style={{ backgroundColor: "red" }}
+                    >
                       Sterge
                     </button>
                   </td>

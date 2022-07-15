@@ -10,7 +10,7 @@ export const sessionStorage = createCookieSessionStorage({
   cookie: {
     name: "__session",
     httpOnly: true,
-    maxAge: 0,
+    // maxAge: 0,
     path: "/",
     sameSite: "lax",
     secrets: [process.env.SESSION_SECRET],
@@ -28,6 +28,7 @@ export async function getSession(request: Request) {
 export async function getUserId(request: Request): Promise<string | undefined> {
   const session = await getSession(request);
   const userId = session.get(USER_SESSION_KEY);
+  console.log('got session', session, userId)
   return userId;
 }
 
@@ -46,6 +47,7 @@ export async function requireUserId(
   redirectTo: string = new URL(request.url).pathname
 ): Promise<string> {
   const userId = await getUserId(request);
+  console.log('mybut userid is here', userId)
   if (!userId) {
     const searchParams = new URLSearchParams([["redirectTo", redirectTo]]);
     throw redirect(`/login?${searchParams}`);
@@ -75,6 +77,7 @@ export async function createUserSession({
 }) {
   const session = await getSession(request);
   session.set(USER_SESSION_KEY, userId);
+  console.log('SET sesion is', session.get('userId'))
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await sessionStorage.commitSession(session, {
@@ -87,6 +90,7 @@ export async function createUserSession({
 }
 
 export async function logout(request: Request) {
+  console.log('LOGOUT?!?!?!?!')
   const session = await getSession(request);
   return redirect("/", {
     headers: {
